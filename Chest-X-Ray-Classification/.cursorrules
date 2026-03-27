@@ -1,0 +1,9 @@
+﻿Always use type hints in Python functions
+Always add docstrings to every function and class (Google style)
+Use black formatting (88 char line length)
+Use pathlib.Path instead of os.path
+Log using Python logging module, never use print() in production code
+Always handle exceptions with specific error types
+Write modular, reusable functions — no monolithic scripts
+Each .py file must have a if __name__ == "__main__": block
+Use config files (YAML) for all hyperparameters, never hardcode values
