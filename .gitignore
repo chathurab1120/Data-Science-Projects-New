@@ -1,0 +1,26 @@
+# Data (raw data never goes to GitHub - too large)
+data/raw/
+data/processed/
+*.csv
+*.parquet
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.env
+venv/
+.venv/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Trained model binaries (large files)
+outputs/models/*.pkl
+outputs/models/*.joblib
+
+# IDE
+.vscode/
+*.DS_Store
+logs/
+*.log
