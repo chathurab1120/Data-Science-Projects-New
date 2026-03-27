@@ -24,3 +24,9 @@ outputs/models/*.joblib
 *.DS_Store
 logs/
 *.log
+
+# Allow outputs for deployment
+!outputs/reports/*.csv
+!outputs/models/best_model.pkl
+!outputs/models/robust_scaler.pkl
+!outputs/models/best_model_name.txt
