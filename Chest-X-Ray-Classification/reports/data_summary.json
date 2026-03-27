@@ -1,0 +1,46 @@
+{
+  "data_dir": "C:\\Users\\chath\\OneDrive\\Documents\\Data_Science_Projects\\Chest X-Ray Classification\\data\\raw\\chest_xray",
+  "artifact_files_removed_count": 0,
+  "split_counts": {
+    "train": 5216,
+    "val": 16,
+    "test": 624
+  },
+  "class_distribution_per_split": {
+    "train": {
+      "NORMAL": 1341,
+      "PNEUMONIA": 3875
+    },
+    "val": {
+      "NORMAL": 8,
+      "PNEUMONIA": 8
+    },
+    "test": {
+      "NORMAL": 234,
+      "PNEUMONIA": 390
+    }
+  },
+  "training_imbalance_ratio": 2.889635,
+  "pixel_statistics": {
+    "sample_size_used": 100,
+    "pixel_mean": [
+      0.469318,
+      0.469318,
+      0.469318
+    ],
+    "pixel_std": [
+      0.227005,
+      0.227005,
+      0.227005
+    ],
+    "min_dimensions": {
+      "width": 557,
+      "height": 177
+    },
+    "max_dimensions": {
+      "width": 2518,
+      "height": 2364
+    },
+    "most_common_mode": "L"
+  }
+}
