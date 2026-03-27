@@ -30,3 +30,6 @@ logs/
 !outputs/models/best_model.pkl
 !outputs/models/robust_scaler.pkl
 !outputs/models/best_model_name.txt
+
+# Cursor IDE files
+.cursor/
