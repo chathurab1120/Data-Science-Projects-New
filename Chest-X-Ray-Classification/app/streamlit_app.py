@@ -15,7 +15,7 @@ import streamlit as st
 from huggingface_hub import hf_hub_download
 import torch
 import yaml
-from PIL import Image
+from PIL import Image, ImageDraw as PILImageDraw
 
 st.set_page_config(
     page_title="Chest X-Ray Classifier",
@@ -191,7 +191,7 @@ def _safe_image(path: Path, caption: str) -> None:
         None.
     """
     if path.exists():
-        st.image(str(path), caption=caption, use_container_width=True)
+        st.image(str(path), caption=caption, width="stretch")
     else:
         st.warning(f"Missing figure: {path}")
 
@@ -240,7 +240,6 @@ def load_model_inference() -> Any:
         transforms = getattr(torchvision_module, "transforms")
         cv2_module = __import__("cv2")
         numpy_module = __import__("numpy")
-        pil_imagedraw = __import__("PIL.ImageDraw", fromlist=["ImageDraw"])
 
         class _FallbackModelInference:
             """Fallback inference class if Gradio module import is unavailable."""
@@ -318,25 +317,32 @@ def load_model_inference() -> Any:
                 Returns:
                     Side-by-side PIL image with original and attention overlay.
                 """
-                rgb_image: Image.Image = image.convert("RGB").resize((224, 224))
-                tensor = self.transform(rgb_image).unsqueeze(0).to(self.device)
-                gradcam = self.gradcam_cls(self.model, target_layer_name="features.denseblock4")
                 try:
-                    heatmap = gradcam.compute(tensor)
-                finally:
-                    gradcam.remove_hooks()
-                original_array = numpy_module.asarray(rgb_image, dtype=numpy_module.uint8)
-                heatmap_uint8 = numpy_module.uint8(255 * heatmap)
-                heatmap_color = cv2_module.applyColorMap(heatmap_uint8, cv2_module.COLORMAP_JET)
-                heatmap_rgb = cv2_module.cvtColor(heatmap_color, cv2_module.COLOR_BGR2RGB)
-                overlay = cv2_module.addWeighted(original_array, 0.5, heatmap_rgb, 0.5, 0)
-                combined = Image.new("RGB", (448, 254), color=(255, 255, 255))
-                combined.paste(Image.fromarray(original_array), (0, 30))
-                combined.paste(Image.fromarray(overlay), (224, 30))
-                draw = pil_imagedraw.ImageDraw.Draw(combined)
-                draw.text((70, 8), "Original", fill=(0, 0, 0))
-                draw.text((258, 8), "AI Focus Area", fill=(0, 0, 0))
-                return combined
+                    rgb_image: Image.Image = image.convert("RGB").resize((224, 224))
+                    tensor = self.transform(rgb_image).unsqueeze(0).to(self.device)
+                    gradcam = self.gradcam_cls(self.model, target_layer_name="features.denseblock4")
+                    try:
+                        heatmap = gradcam.compute(tensor)
+                    finally:
+                        gradcam.remove_hooks()
+                    original_array = numpy_module.asarray(rgb_image, dtype=numpy_module.uint8)
+                    heatmap_uint8 = numpy_module.uint8(255 * heatmap)
+                    heatmap_color = cv2_module.applyColorMap(heatmap_uint8, cv2_module.COLORMAP_JET)
+                    heatmap_rgb = cv2_module.cvtColor(heatmap_color, cv2_module.COLOR_BGR2RGB)
+                    overlay = cv2_module.addWeighted(original_array, 0.5, heatmap_rgb, 0.5, 0)
+                    combined = Image.new("RGB", (448, 254), color=(255, 255, 255))
+                    combined.paste(Image.fromarray(original_array), (0, 30))
+                    combined.paste(Image.fromarray(overlay), (224, 30))
+                    draw = PILImageDraw.Draw(combined)
+                    draw.text((70, 8), "Original", fill=(0, 0, 0))
+                    draw.text((258, 8), "AI Focus Area", fill=(0, 0, 0))
+                    return combined
+                except Exception as exc:
+                    LOGGER.warning(
+                        "Grad-CAM failed: %s. Returning original image.",
+                        exc,
+                    )
+                    return image.resize((224, 224))
 
         return _FallbackModelInference(model_path=model_path, config_path=config_path)
 
@@ -358,10 +364,10 @@ def render_overview_page(data_summary: dict[str, Any] | None) -> None:
     st.warning("⚠️ Research use only. This dashboard does not provide medical diagnosis.")
 
     metric_columns = st.columns(4)
-    metric_columns[0].metric("Test Accuracy", "84.5%")
-    metric_columns[1].metric("Recall", "99.7%")
-    metric_columns[2].metric("AUC-ROC", "95.0%")
-    metric_columns[3].metric("F1 Score", "88.9%")
+    metric_columns[0].metric("Test Accuracy", "87.8%")
+    metric_columns[1].metric("Recall", "99.5%")
+    metric_columns[2].metric("AUC-ROC", "96.8%")
+    metric_columns[3].metric("F1 Score", "91.1%")
 
     left_column, right_column = st.columns(2)
     with left_column:
@@ -467,7 +473,7 @@ def render_performance_page(
                 "val_auc": round(float(entry.get("val_auc_roc", 0.0)), 4),
             }
         )
-    st.dataframe(history_rows, use_container_width=True)
+    st.dataframe(history_rows, width="stretch")
 
     st.subheader("Threshold Analysis")
     threshold_analysis: dict[str, dict[str, float]] = evaluation_report.get("threshold_analysis", {})
@@ -503,11 +509,11 @@ def render_performance_page(
             return [""] * len(row)
 
         styled_df = threshold_df.style.apply(_style_threshold_row, axis=1).format({"threshold": "{:.1f}"})
-        st.dataframe(styled_df, use_container_width=True, hide_index=True)
+        st.dataframe(styled_df, width="stretch", hide_index=True)
     except ModuleNotFoundError:
         st.dataframe(
             threshold_rows,
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
             column_config={"threshold": st.column_config.NumberColumn(format="%.1f")},
         )
@@ -582,7 +588,7 @@ def render_live_prediction_page(model_inference: Any | None) -> None:
         if uploaded_file is not None:
             try:
                 selected_image = Image.open(uploaded_file).convert("RGB")
-                st.image(selected_image, caption="Uploaded X-ray", use_container_width=True)
+                st.image(selected_image, caption="Uploaded X-ray", width="stretch")
             except (OSError, ValueError):
                 st.warning("Could not read uploaded image.")
 
@@ -593,7 +599,7 @@ def render_live_prediction_page(model_inference: Any | None) -> None:
                 example_path: Path = example_options[selected_example]
                 try:
                     selected_image = Image.open(example_path).convert("RGB")
-                    st.image(selected_image, caption=selected_example, use_container_width=True)
+                    st.image(selected_image, caption=selected_example, width="stretch")
                 except (OSError, ValueError):
                     st.warning(f"Could not load example image: {example_path}")
 
@@ -624,7 +630,7 @@ def render_live_prediction_page(model_inference: Any | None) -> None:
                     st.image(
                         gradcam_image,
                         caption="Grad-CAM overlay: red regions indicate stronger model attention.",
-                        use_container_width=True,
+                        width="stretch",
                     )
                 except (RuntimeError, ValueError, KeyError, OSError) as exc:
                     LOGGER.error("Prediction error: %s\n%s", exc, traceback.format_exc())
@@ -664,7 +670,7 @@ def render_explainability_page() -> None:
             "- In many **PNEUMONIA** cases, attention clusters around dense or diffuse opacities.\n"
             "- In **NORMAL** cases, attention is often more distributed with less focal pathology emphasis.\n"
             "- Failure modes include atypical anatomy, low contrast, artifacts, or severe overlap between classes.\n"
-            "- This system prioritizes **high recall (99.7%)** to reduce missed pneumonia cases, accepting some false positives."
+            "- This system prioritizes **high recall (99.5%)** to reduce missed pneumonia cases, accepting some false positives."
         )
 
     st.subheader("Model Architecture")
@@ -701,8 +707,16 @@ def render_sidebar(model_inference: Any | None) -> str:
     st.sidebar.info(f"**Model:** DenseNet121\n\n**Status:** {status_text}\n\n**Device:** {device_name}")
 
     st.sidebar.divider()
-    st.sidebar.markdown("🤗 Hugging Face Space: [URL placeholder](https://huggingface.co/spaces/your-username/your-space)")
-    st.sidebar.markdown("💻 GitHub Repository: [URL placeholder](https://github.com/your-username/your-repo)")
+    st.sidebar.markdown(
+        "🤗 Hugging Face Space: "
+        "[chathurab1120/chest-xray-classifier]"
+        "(https://huggingface.co/spaces/chathurab1120/chest-xray-classifier)"
+    )
+    st.sidebar.markdown(
+        "💻 GitHub Repository: "
+        "[Data-Science-Projects-New]"
+        "(https://github.com/chathurab1120/Data-Science-Projects-New)"
+    )
     st.sidebar.markdown("📧 Contact: [placeholder](mailto:you@example.com)")
 
     st.sidebar.divider()
