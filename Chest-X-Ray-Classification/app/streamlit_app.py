@@ -5,11 +5,14 @@ from __future__ import annotations
 import importlib.util
 import json
 import logging
+import os
+import shutil
 import traceback
 from pathlib import Path
 from typing import Any
 
 import streamlit as st
+from huggingface_hub import hf_hub_download
 import torch
 import yaml
 from PIL import Image
@@ -33,6 +36,37 @@ if not LOGGER.handlers:
 PROJECT_ROOT: Path = Path(__file__).resolve().parents[1]
 FIGURES_DIR: Path = PROJECT_ROOT / "reports" / "figures"
 REPORTS_DIR: Path = PROJECT_ROOT / "reports"
+
+
+def get_model_path() -> Path:
+    """Return path to ``best_model.pth``, downloading from HF Hub if missing locally.
+
+    Args:
+        None.
+
+    Returns:
+        Absolute path to the checkpoint under ``models/checkpoints/best_model.pth``.
+
+    Raises:
+        OSError: If checkpoint directories cannot be created or the file cannot be copied.
+        huggingface_hub.errors.HfHubHTTPError: If the Hub download fails.
+    """
+    local_path: Path = PROJECT_ROOT / "models" / "checkpoints" / "best_model.pth"
+    if local_path.is_file():
+        return local_path
+
+    local_path.parent.mkdir(parents=True, exist_ok=True)
+    downloaded: str = hf_hub_download(
+        repo_id="chathurab1120/chest-xray-classifier",
+        filename="models/best_model.pth",
+        repo_type="space",
+        local_dir=str(local_path.parent),
+        local_dir_use_symlinks=False,
+    )
+    source: Path = Path(downloaded)
+    if source.resolve() != local_path.resolve() and source.is_file():
+        shutil.copy2(source, local_path)
+    return local_path
 
 
 def _load_script_module(module_name: str, script_path: Path) -> Any:
@@ -190,7 +224,7 @@ def load_model_inference() -> Any:
     Raises:
         RuntimeError: If model cannot be initialized.
     """
-    model_path: Path = PROJECT_ROOT / "models" / "checkpoints" / "best_model.pth"
+    model_path: Path = get_model_path()
     config_path: Path = PROJECT_ROOT / "configs" / "config.yaml"
 
     try:
@@ -323,13 +357,11 @@ def render_overview_page(data_summary: dict[str, Any] | None) -> None:
     )
     st.warning("⚠️ Research use only. This dashboard does not provide medical diagnosis.")
 
-    metric_columns = st.columns(6)
-    metric_columns[0].metric("Test Accuracy", "87.8%")
-    metric_columns[1].metric("Precision", "84.0%")
-    metric_columns[2].metric("Recall", "99.5%")
-    metric_columns[3].metric("F1 Score", "91.1%")
-    metric_columns[4].metric("AUC-ROC", "96.8%")
-    metric_columns[5].metric("Specificity", "68.4%")
+    metric_columns = st.columns(4)
+    metric_columns[0].metric("Test Accuracy", "84.5%")
+    metric_columns[1].metric("Recall", "99.7%")
+    metric_columns[2].metric("AUC-ROC", "95.0%")
+    metric_columns[3].metric("F1 Score", "88.9%")
 
     left_column, right_column = st.columns(2)
     with left_column:
@@ -632,7 +664,7 @@ def render_explainability_page() -> None:
             "- In many **PNEUMONIA** cases, attention clusters around dense or diffuse opacities.\n"
             "- In **NORMAL** cases, attention is often more distributed with less focal pathology emphasis.\n"
             "- Failure modes include atypical anatomy, low contrast, artifacts, or severe overlap between classes.\n"
-            "- This system prioritizes **high recall (99.5%)** to reduce missed pneumonia cases, accepting some false positives."
+            "- This system prioritizes **high recall (99.7%)** to reduce missed pneumonia cases, accepting some false positives."
         )
 
     st.subheader("Model Architecture")

@@ -6,3 +6,4 @@ Pillow
 opencv-python-headless
 pyyaml
 scikit-learn
+huggingface_hub
