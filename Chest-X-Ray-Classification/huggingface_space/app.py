@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import importlib.util
 import logging
 import sys
 import traceback
@@ -17,6 +16,11 @@ import yaml
 from PIL import Image, ImageDraw
 from torch import Tensor, nn
 from torchvision import transforms
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from src.model import ChestXRayModel
+from src.gradcam import GradCAM
 
 LOGGER: logging.Logger = logging.getLogger("gradio_app")
 LOGGER.setLevel(logging.INFO)
@@ -54,36 +58,6 @@ def download_model_if_needed(space_root: Path) -> None:
 
 
 download_model_if_needed(SPACE_ROOT)
-
-
-def _load_script_module(module_name: str, script_path: Path) -> Any:
-    """Load a Python module from a script file path.
-
-    Args:
-        module_name: Name to assign loaded module.
-        script_path: Path to script file.
-
-    Returns:
-        Loaded module object.
-
-    Raises:
-        FileNotFoundError: If script path does not exist.
-        ImportError: If module import fails.
-    """
-    if not script_path.exists():
-        raise FileNotFoundError(f"Script not found: {script_path}")
-    spec = importlib.util.spec_from_file_location(module_name, script_path)
-    if spec is None or spec.loader is None:
-        raise ImportError(f"Unable to create import spec for {script_path}")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-MODEL_MODULE: Any = _load_script_module("model_training_module", SPACE_ROOT / "src" / "03_model_training.py")
-EVAL_MODULE: Any = _load_script_module("evaluation_module", SPACE_ROOT / "src" / "04_evaluation.py")
-ChestXRayModel: type[nn.Module] = MODEL_MODULE.ChestXRayModel
-GradCAM: type[Any] = EVAL_MODULE.GradCAM
 
 
 class ModelInference:
@@ -360,8 +334,9 @@ def build_interface() -> gr.Blocks:
     if not examples_root.is_absolute():
         examples_root = SPACE_ROOT / examples_root
     example_images: list[str] = _find_example_images(examples_root)
+    example_rows: list[list[str]] = [[path] for path in example_images]
 
-    with gr.Blocks(theme=gr.themes.Soft(), title="Chest X-Ray Pneumonia Classifier") as demo:
+    with gr.Blocks(title="Chest X-Ray Pneumonia Classifier") as demo:
         gr.Markdown("# 🫁 Chest X-Ray Pneumonia Classifier")
         gr.Markdown(
             "DenseNet121 transfer learning model with Grad-CAM explainability. "
@@ -375,20 +350,26 @@ def build_interface() -> gr.Blocks:
 
         with gr.Row():
             with gr.Column(scale=1):
-                input_image: gr.Image = gr.Image(type="pil", label="Upload Chest X-Ray Image")
+                image_input: gr.Image = gr.Image(type="pil", label="Upload Chest X-Ray Image")
                 analyze_button: gr.Button = gr.Button("🔍 Analyze X-Ray", variant="primary")
-                if example_images:
-                    gr.Examples(examples=example_images, inputs=input_image, label="Example Test Images")
+                if example_rows:
+                    gr.Examples(
+                        examples=example_rows,
+                        inputs=[image_input],
+                        label="Example Test Images",
+                    )
 
             with gr.Column(scale=1):
                 diagnosis_box: gr.Textbox = gr.Textbox(label="📋 Diagnosis", interactive=False)
                 scores_box: gr.Textbox = gr.Textbox(label="📊 Confidence Scores", interactive=False)
-                assessment_box: gr.Textbox = gr.Textbox(label="⚕️ Risk Assessment", interactive=False, lines=4)
+                assessment_box: gr.Textbox = gr.Textbox(
+                    label="⚕️ Risk Assessment", interactive=False, lines=4
+                )
                 gradcam_box: gr.Image = gr.Image(label="🧠 Grad-CAM — Where the AI is looking")
 
         analyze_button.click(
             fn=predict_image,
-            inputs=input_image,
+            inputs=image_input,
             outputs=[diagnosis_box, scores_box, gradcam_box, assessment_box],
         )
 
@@ -405,14 +386,16 @@ def build_interface() -> gr.Blocks:
         gr.Markdown(
             "Dataset credit: Kaggle Chest X-Ray Images (Pneumonia)\n\n"
             "View full project on GitHub: "
-            "[Data-Science-Projects-New](https://github.com/chathurab1120/Data-Science-Projects-New)"
+            "[Data-Science-Projects-New]"
+            "(https://github.com/chathurab1120/Data-Science-Projects-New/tree/main/Chest-X-Ray-Classification)"
         )
 
     return demo
 
 
-DEMO: gr.Blocks = build_interface()
-
-
 if __name__ == "__main__":
-    DEMO.launch()
+    demo = build_interface()
+    demo.launch(ssr_mode=False)
+else:
+    # Hugging Face Spaces may import this module; expose ``demo`` without launching here.
+    demo = build_interface()
