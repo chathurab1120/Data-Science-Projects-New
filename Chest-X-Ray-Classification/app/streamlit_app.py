@@ -715,7 +715,7 @@ def render_sidebar(model_inference: Any | None) -> str:
     st.sidebar.markdown(
         "💻 GitHub Repository: "
         "[Data-Science-Projects-New]"
-        "(https://github.com/chathurab1120/Data-Science-Projects-New)"
+        "(https://github.com/chathurab1120/Data-Science-Projects-New/tree/main/Chest-X-Ray-Classification)"
     )
     st.sidebar.markdown("📧 Contact: [placeholder](mailto:you@example.com)")
 
