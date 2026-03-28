@@ -30,6 +30,6 @@ A curated collection of end-to-end machine learning and deep learning projects.
 
 **Deployments:**
 - 🤗 [Live Demo - Hugging Face](https://huggingface.co/spaces/chathurab1120/chest-xray-classifier)
-- 📊 [Dashboard - Streamlit](URL_PLACEHOLDER)
+- 📊 [Dashboard - Streamlit](https://chest-xray-dashboard.streamlit.app)
 
-[📁 View Project](./Chest-X-Ray-Classification/)
+[📁 View Project](https://github.com/chathurab1120/Data-Science-Projects-New/tree/main/Chest-X-Ray-Classification)
