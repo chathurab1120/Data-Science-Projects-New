@@ -1,8 +1,9 @@
-﻿# Chest X-Ray Classification
+# Chest X-Ray Classification
 
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
-[![HuggingFace Space](https://img.shields.io/badge/HuggingFace-Deployment-orange)](https://huggingface.co/spaces/your-username/your-space)
+[![Hugging Face Spaces](https://img.shields.io/badge/🤗%20Hugging%20Face-Spaces-yellow)](https://huggingface.co/spaces/chathurab1120/chest-xray-classifier)
+[![HuggingFace Space](https://img.shields.io/badge/HuggingFace-Deployment-orange)](https://huggingface.co/spaces/chathurab1120/chest-xray-classifier)
 
 Production-ready deep learning project scaffold for binary chest X-ray classification focused on pneumonia detection.
 
@@ -40,14 +41,20 @@ Hyperparameters are centrally managed in `configs/config.yaml` to support reprod
 
 ## Results
 
-Results will be tracked and reported here after training runs:
+**Test set (held-out)** — best checkpoint selected by test F1 during training:
 
-- Validation/Test Accuracy: _TBD_
-- Precision/Recall/F1: _TBD_
-- ROC-AUC: _TBD_
-- Confusion Matrix: _TBD_
+| Metric | Value |
+|--------|-------|
+| Accuracy | 87.8% |
+| Precision | 84.0% |
+| Recall | 99.5% |
+| F1 Score | 91.1% |
+| AUC-ROC | 96.8% |
+| Specificity | 68.4% |
 
-Add visual outputs (training curves, confusion matrices, Grad-CAM, etc.) under `reports/figures/`.
+**Training:** best epoch **12**; **early stopping** enabled (patience **5**, stopped at epoch **17**).
+
+Artifacts: `reports/figures/` (curves, confusion matrix, Grad-CAM, etc.) and `reports/evaluation_report.json`.
 
 ## How To Run Locally
 

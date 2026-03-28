@@ -13,10 +13,12 @@ A curated collection of end-to-end machine learning and deep learning projects.
 
 | Metric | Score |
 |--------|-------|
-| Accuracy | 84.5% |
-| Recall | 99.7% |
-| AUC-ROC | 95.0% |
-| F1 Score | 88.9% |
+| Accuracy | 87.8% |
+| Precision | 84.0% |
+| Recall | 99.5% |
+| F1 Score | 91.1% |
+| AUC-ROC | 96.8% |
+| Specificity | 68.4% |
 
 **Key Features:**
 - Two-phase transfer learning (feature extraction → fine-tuning)
@@ -24,8 +26,10 @@ A curated collection of end-to-end machine learning and deep learning projects.
 - Grad-CAM explainability heatmaps
 - Deployed on Hugging Face Spaces + Streamlit Cloud
 
+**Training note:** Early stopping at epoch 17; best checkpoint at epoch 12 (test F1).
+
 **Deployments:**
-- 🤗 [Live Demo - Hugging Face](URL_PLACEHOLDER)
+- 🤗 [Live Demo - Hugging Face](https://huggingface.co/spaces/chathurab1120/chest-xray-classifier)
 - 📊 [Dashboard - Streamlit](URL_PLACEHOLDER)
 
 [📁 View Project](./Chest-X-Ray-Classification/)
