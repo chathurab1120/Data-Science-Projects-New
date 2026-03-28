@@ -1,9 +1,10 @@
 # Chest X-Ray Classification
 
+[![HuggingFace](https://img.shields.io/badge/🤗%20HuggingFace-Live%20Demo-blue)](https://huggingface.co/spaces/chathurab1120/chest-xray-classifier)
+[![Streamlit](https://img.shields.io/badge/📊%20Streamlit-Dashboard-red)](https://chest-xray-dashboard.streamlit.app)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-black?logo=github)](https://github.com/chathurab1120/Data-Science-Projects-New/tree/main/Chest-X-Ray-Classification)
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
-[![Hugging Face Spaces](https://img.shields.io/badge/🤗%20Hugging%20Face-Spaces-yellow)](https://huggingface.co/spaces/chathurab1120/chest-xray-classifier)
-[![HuggingFace Space](https://img.shields.io/badge/HuggingFace-Deployment-orange)](https://huggingface.co/spaces/chathurab1120/chest-xray-classifier)
 
 Production-ready deep learning project scaffold for binary chest X-ray classification focused on pneumonia detection.
 
@@ -43,18 +44,30 @@ Hyperparameters are centrally managed in `configs/config.yaml` to support reprod
 
 **Test set (held-out)** — best checkpoint selected by test F1 during training:
 
-| Metric | Value |
+| Metric | Score |
 |--------|-------|
 | Accuracy | 87.8% |
-| Precision | 84.0% |
 | Recall | 99.5% |
+| Precision | 84.0% |
 | F1 Score | 91.1% |
 | AUC-ROC | 96.8% |
 | Specificity | 68.4% |
 
-**Training:** best epoch **12**; **early stopping** enabled (patience **5**, stopped at epoch **17**).
+**Training notes:**
+
+- Best epoch: **12**
+- Early stopping triggered at epoch **17** (patience=**5**)
+- Training set: **5,216** images
+- Class imbalance ratio: **2.89×** (handled via `WeightedRandomSampler`)
 
 Artifacts: `reports/figures/` (curves, confusion matrix, Grad-CAM, etc.) and `reports/evaluation_report.json`.
+
+## 🌐 Live Deployments
+
+| App | URL | Description |
+|-----|-----|-------------|
+| 🤗 Hugging Face | [Live Demo](https://huggingface.co/spaces/chathurab1120/chest-xray-classifier) | Upload X-ray → instant diagnosis + Grad-CAM heatmap |
+| 📊 Streamlit | [Dashboard](https://chest-xray-dashboard.streamlit.app) | Full project dashboard with EDA, metrics, explainability |
 
 ## How To Run Locally
 
@@ -82,16 +95,6 @@ Edit `configs/config.yaml` for data paths, architecture, and training parameters
 ### 4) Run training/inference scripts
 
 Place your training and evaluation entry points inside `src/` and ensure each script includes an executable `if __name__ == "__main__":` block.
-
-## Deployment
-
-The scaffold includes an `app/` directory for serving inference endpoints/UI (e.g., Gradio app) and a placeholder HuggingFace deployment badge.
-
-Recommended deployment flow:
-
-1. Export best checkpoint from `models/checkpoints/`
-2. Build inference wrapper in `app/`
-3. Deploy to HuggingFace Spaces, cloud VM, or containerized runtime
 
 ## Author
 
