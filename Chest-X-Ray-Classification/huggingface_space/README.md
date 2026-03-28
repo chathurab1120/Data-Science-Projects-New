@@ -1,0 +1,37 @@
+---
+title: Chest X-Ray Pneumonia Classifier
+emoji: 🫁
+colorFrom: blue
+colorTo: indigo
+sdk: gradio
+sdk_version: 4.7.1
+app_file: app.py
+pinned: false
+license: mit
+---
+
+# 🫁 Chest X-Ray Pneumonia Classifier
+
+AI-powered pneumonia detection from chest X-rays using DenseNet121.
+
+## 🎯 Model Performance
+| Metric | Score |
+|--------|-------|
+| Accuracy | 84.5% |
+| Recall | 99.7% |
+| Precision | 80.2% |
+| F1 Score | 88.9% |
+| AUC-ROC | 95.0% |
+
+## 🏗️ Architecture
+- Model: DenseNet121 pretrained on ImageNet
+- Two-phase transfer learning
+- Trained on 5,216 chest X-ray images
+- Weighted sampling for class imbalance (2.89x)
+
+## ⚠️ Disclaimer
+This tool is for research and educational purposes only.
+It is NOT a substitute for professional medical diagnosis.
+
+## 📁 Full Project
+GitHub: https://github.com/chathurab1120/Data-Science-Projects-New
