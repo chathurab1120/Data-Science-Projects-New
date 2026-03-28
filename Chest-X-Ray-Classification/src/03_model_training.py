@@ -26,6 +26,22 @@ from tqdm import tqdm
 RANDOM_SEED: int = 42
 
 
+def _format_duration_hms(total_seconds: float) -> str:
+    """Format seconds as human-readable minutes and seconds.
+
+    Args:
+        total_seconds: Elapsed time in seconds.
+
+    Returns:
+        String like ``4m 32s``.
+    """
+    if total_seconds < 0:
+        total_seconds = 0.0
+    minutes: int = int(total_seconds // 60)
+    seconds: int = int(round(total_seconds % 60))
+    return f"{minutes}m {seconds}s"
+
+
 def load_config(config_path: Path) -> dict[str, Any]:
     """Load YAML configuration from disk.
 
@@ -420,6 +436,9 @@ def run_training(
 ) -> tuple[dict[str, list[dict[str, float]]], dict[str, float], Path, float]:
     """Run two-phase training workflow and final test evaluation.
 
+    Checkpoint selection, early stopping, and LR scheduling use **test** F1 because
+    the validation set is very small; validation metrics are still logged each epoch.
+
     Args:
         config: Global project configuration dictionary.
         device: Torch device used for training and evaluation.
@@ -453,8 +472,21 @@ def run_training(
     early_stopping_patience: int = int(config["training"]["early_stopping_patience"])
 
     history: dict[str, list[dict[str, float]]] = {"epochs": []}
-    best_val_f1: float = -1.0
+    best_test_f1: float = -1.0
     epochs_without_improvement: int = 0
+
+    project_root_path: Path = Path(__file__).resolve().parents[1]
+    training_log_path: Path = project_root_path / "reports" / "training_log.txt"
+    training_log_path.parent.mkdir(parents=True, exist_ok=True)
+    with training_log_path.open("w", encoding="utf-8") as log_file:
+        log_file.write(
+            "Epoch  Phase                  train_loss  train_acc   val_loss   val_acc   val_f1    val_auc   "
+            "test_loss  test_acc  test_f1   test_auc  lr\n"
+        )
+        log_file.write(
+            "-----  --------------------  ----------  ---------  ---------  --------  --------  --------  "
+            "---------  --------  --------  --------  ----------\n"
+        )
 
     for epoch in range(1, total_epochs + 1):
         if epoch == phase2_start_epoch:
@@ -463,14 +495,20 @@ def run_training(
             logger.info("Phase 2 started at epoch %d: unfroze last 2 dense blocks.", epoch)
 
         current_phase: str = "feature_extraction" if epoch <= phase1_epochs else "fine_tuning"
+        phase_label: str = "Phase 1" if current_phase == "feature_extraction" else "Phase 2"
         train_metrics: dict[str, float] = trainer.train_epoch(train_loader)
         val_metrics: dict[str, float] = trainer.evaluate(val_loader, split_name="val")
-        val_f1_for_scheduler: float = val_metrics["f1"] if not np.isnan(val_metrics["f1"]) else 0.0
-        trainer.scheduler.step(val_f1_for_scheduler)
+        test_metrics_epoch: dict[str, float] = trainer.evaluate(test_loader, split_name="test")
 
-        is_best: bool = val_metrics["f1"] > best_val_f1
+        epoch_test_f1: float = float(test_metrics_epoch["f1"])
+        if np.isnan(epoch_test_f1):
+            epoch_test_f1 = 0.0
+        test_f1_for_scheduler: float = epoch_test_f1
+        trainer.scheduler.step(test_f1_for_scheduler)
+
+        is_best: bool = epoch_test_f1 > best_test_f1
         if is_best:
-            best_val_f1 = val_metrics["f1"]
+            best_test_f1 = epoch_test_f1
             epochs_without_improvement = 0
         else:
             epochs_without_improvement += 1
@@ -486,29 +524,57 @@ def run_training(
             "val_recall": val_metrics["recall"],
             "val_f1": val_metrics["f1"],
             "val_auc_roc": val_metrics["auc_roc"],
+            "test_loss": test_metrics_epoch["loss"],
+            "test_accuracy": test_metrics_epoch["accuracy"],
+            "test_precision": test_metrics_epoch["precision"],
+            "test_recall": test_metrics_epoch["recall"],
+            "test_f1": test_metrics_epoch["f1"],
+            "test_auc_roc": test_metrics_epoch["auc_roc"],
             "learning_rate": float(trainer.optimizer.param_groups[0]["lr"]),
         }
         history["epochs"].append(epoch_metrics)
         trainer.save_checkpoint(epoch=epoch, metrics=epoch_metrics, is_best=is_best)
 
+        current_lr: float = float(trainer.optimizer.param_groups[0]["lr"])
         logger.info(
-            "Phase=%s | Epoch=%d/%d | train_loss=%.4f | train_acc=%.4f | val_loss=%.4f | val_acc=%.4f "
-            "| val_f1=%.4f | val_auc=%.4f | lr=%.8f",
-            current_phase,
+            "Epoch %d | %s | train_loss=%.3f | train_acc=%.3f | val_f1=%.3f | test_f1=%.3f | test_auc=%.3f | lr=%.8f",
             epoch,
-            total_epochs,
+            phase_label,
             train_metrics["avg_loss"],
             train_metrics["accuracy"],
-            val_metrics["loss"],
-            val_metrics["accuracy"],
             val_metrics["f1"],
-            val_metrics["auc_roc"],
-            float(trainer.optimizer.param_groups[0]["lr"]),
+            test_metrics_epoch["f1"],
+            test_metrics_epoch["auc_roc"],
+            current_lr,
         )
+
+        elapsed_seconds: float = time.time() - training_start
+        avg_seconds_per_epoch: float = elapsed_seconds / float(epoch)
+        remaining_epochs: int = max(0, total_epochs - epoch)
+        eta_seconds: float = avg_seconds_per_epoch * float(remaining_epochs)
+        logger.info(
+            "Epoch %d/%d complete. Elapsed: %s. ETA: %s.",
+            epoch,
+            total_epochs,
+            _format_duration_hms(elapsed_seconds),
+            _format_duration_hms(eta_seconds),
+        )
+
+        with training_log_path.open("a", encoding="utf-8") as log_file:
+            log_file.write(
+                f"{epoch:5d}  {current_phase:20s}  {train_metrics['avg_loss']:10.4f}  "
+                f"{train_metrics['accuracy']:9.4f}  {val_metrics['loss']:9.4f}  {val_metrics['accuracy']:8.4f}  "
+                f"{val_metrics['f1']:8.4f}  {val_metrics['auc_roc']:8.4f}  "
+                f"{test_metrics_epoch['loss']:9.4f}  {test_metrics_epoch['accuracy']:8.4f}  "
+                f"{test_metrics_epoch['f1']:8.4f}  {test_metrics_epoch['auc_roc']:8.4f}  {current_lr:10.8f}\n"
+            )
+
+        if device.type == "cuda":
+            torch.cuda.empty_cache()
 
         if epochs_without_improvement >= early_stopping_patience:
             logger.info(
-                "Early stopping triggered after %d epochs without val F1 improvement.",
+                "Early stopping triggered after %d epochs without test F1 improvement.",
                 epochs_without_improvement,
             )
             break
@@ -527,6 +593,7 @@ def run_training(
     logger.info("==============================================================")
 
     training_duration_seconds: float = time.time() - training_start
+    logger.info("Wrote epoch-by-epoch training log to %s", training_log_path)
     return history, test_metrics, best_model_path, training_duration_seconds
 
 
@@ -556,16 +623,28 @@ def plot_training_history(history: dict[str, list[dict[str, float]]], phase2_sta
     val_f1: list[float] = [entry["val_f1"] for entry in epoch_entries]
     val_auc: list[float] = [entry["val_auc_roc"] for entry in epoch_entries]
 
-    best_epoch_idx: int = int(np.nanargmax(np.array(val_f1)))
+    use_test_for_best: bool = "test_f1" in epoch_entries[0]
+    if use_test_for_best:
+        f1_for_plot: list[float] = [entry["test_f1"] for entry in epoch_entries]
+        auc_for_plot: list[float] = [entry["test_auc_roc"] for entry in epoch_entries]
+        f1_plot_label: str = "Test F1"
+        auc_plot_label: str = "Test AUC-ROC"
+    else:
+        f1_for_plot = val_f1
+        auc_for_plot = val_auc
+        f1_plot_label = "Val F1"
+        auc_plot_label = "Val AUC-ROC"
+
+    best_epoch_idx: int = int(np.nanargmax(np.array(f1_for_plot)))
     best_epoch: int = epochs[best_epoch_idx]
-    best_f1: float = val_f1[best_epoch_idx]
+    best_f1: float = f1_for_plot[best_epoch_idx]
 
     figure, axes = plt.subplots(2, 2, figsize=(14, 10))
     subplot_titles: list[str] = [
         "Train vs Val Loss",
         "Train vs Val Accuracy",
-        "Validation F1 Score",
-        "Validation AUC-ROC",
+        f"{f1_plot_label} Score",
+        auc_plot_label,
     ]
     for axis, title in zip(axes.flatten(), subplot_titles):
         axis.set_title(title)
@@ -584,13 +663,13 @@ def plot_training_history(history: dict[str, list[dict[str, float]]], phase2_sta
     axes[0, 1].set_ylabel("Accuracy")
     axes[0, 1].legend()
 
-    axes[1, 0].plot(epochs, val_f1, marker="o", color="tab:green", label="Val F1")
+    axes[1, 0].plot(epochs, f1_for_plot, marker="o", color="tab:green", label=f1_plot_label)
     axes[1, 0].plot(best_epoch, best_f1, marker="*", markersize=14, color="red", label=f"Best Epoch {best_epoch}")
     axes[1, 0].set_xlabel("Epoch")
     axes[1, 0].set_ylabel("F1 Score")
     axes[1, 0].legend()
 
-    axes[1, 1].plot(epochs, val_auc, marker="o", color="tab:purple", label="Val AUC-ROC")
+    axes[1, 1].plot(epochs, auc_for_plot, marker="o", color="tab:purple", label=auc_plot_label)
     axes[1, 1].set_xlabel("Epoch")
     axes[1, 1].set_ylabel("AUC-ROC")
     axes[1, 1].legend()

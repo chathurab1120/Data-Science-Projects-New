@@ -1,13 +1,18 @@
-﻿data/
-models/checkpoints/*.pth
+﻿# Data artifacts
+/data/raw/
+
+# Model checkpoints
+/models/checkpoints/*.pth
+
+# Python cache and packaging
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Environments and secrets
+.env
 .venv/
 venv/
-__pycache__/
-*.pyc
-*.pyo
-.env
+
+# OS files
 .DS_Store
-*.egg-info/
-.streamlit/
-*.log
-reports/figures/*.png
