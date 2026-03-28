@@ -323,11 +323,13 @@ def render_overview_page(data_summary: dict[str, Any] | None) -> None:
     )
     st.warning("⚠️ Research use only. This dashboard does not provide medical diagnosis.")
 
-    metric_columns = st.columns(4)
-    metric_columns[0].metric("Test Accuracy", "84.5%")
-    metric_columns[1].metric("Recall", "99.7%")
-    metric_columns[2].metric("AUC-ROC", "95.0%")
-    metric_columns[3].metric("F1 Score", "88.9%")
+    metric_columns = st.columns(6)
+    metric_columns[0].metric("Test Accuracy", "87.8%")
+    metric_columns[1].metric("Precision", "84.0%")
+    metric_columns[2].metric("Recall", "99.5%")
+    metric_columns[3].metric("F1 Score", "91.1%")
+    metric_columns[4].metric("AUC-ROC", "96.8%")
+    metric_columns[5].metric("Specificity", "68.4%")
 
     left_column, right_column = st.columns(2)
     with left_column:
@@ -630,7 +632,7 @@ def render_explainability_page() -> None:
             "- In many **PNEUMONIA** cases, attention clusters around dense or diffuse opacities.\n"
             "- In **NORMAL** cases, attention is often more distributed with less focal pathology emphasis.\n"
             "- Failure modes include atypical anatomy, low contrast, artifacts, or severe overlap between classes.\n"
-            "- This system prioritizes **high recall (99.7%)** to reduce missed pneumonia cases, accepting some false positives."
+            "- This system prioritizes **high recall (99.5%)** to reduce missed pneumonia cases, accepting some false positives."
         )
 
     st.subheader("Model Architecture")

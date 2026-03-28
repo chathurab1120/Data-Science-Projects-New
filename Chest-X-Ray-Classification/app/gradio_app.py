@@ -323,7 +323,8 @@ def build_interface() -> gr.Blocks:
         gr.Markdown("# 🫁 Chest X-Ray Pneumonia Classifier")
         gr.Markdown(
             "DenseNet121 transfer learning model with Grad-CAM explainability. "
-            "Test performance: Accuracy 84.5%, Recall 99.7%, AUC-ROC 95.0%, F1 88.9%."
+            "Test performance: Accuracy 87.8%, Precision 84.0%, Recall 99.5%, "
+            "F1 91.1%, AUC-ROC 96.8%, Specificity 68.4%."
         )
         gr.Markdown(
             "### 🚨 **Research Use Only**\n"
@@ -354,8 +355,9 @@ def build_interface() -> gr.Blocks:
                 "- The model uses **DenseNet121** with transfer learning to identify patterns linked to pneumonia.\n"
                 "- Transfer learning starts from prior visual knowledge and adapts it to chest X-ray features.\n"
                 "- **Grad-CAM** highlights where the network focuses; red areas indicate higher model attention.\n"
-                "- In medical screening, high **recall (99.7%)** is critical to minimize missed pneumonia cases.\n\n"
-                "**Model Stats:** Accuracy 84.5%, Recall 99.7%, AUC-ROC 95.0%, F1 88.9%."
+                "- In medical screening, high **recall (99.5%)** is critical to minimize missed pneumonia cases.\n\n"
+                "**Model Stats:** Accuracy 87.8%, Precision 84.0%, Recall 99.5%, F1 91.1%, "
+                "AUC-ROC 96.8%, Specificity 68.4%."
             )
 
         gr.Markdown(

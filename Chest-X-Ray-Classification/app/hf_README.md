@@ -37,10 +37,12 @@ The app includes Grad-CAM visual explanations so users can inspect where the mod
 
 Evaluated on the held-out test set:
 
-- Accuracy: **84.5%**
-- Recall: **99.7%**
-- AUC-ROC: **95.0%**
-- F1 Score: **88.9%**
+- Accuracy: **87.8%**
+- Precision: **84.0%**
+- Recall: **99.5%**
+- F1 Score: **91.1%**
+- AUC-ROC: **96.8%**
+- Specificity: **68.4%**
 
 High recall is especially important for screening use cases to reduce missed pneumonia-positive cases.
 
