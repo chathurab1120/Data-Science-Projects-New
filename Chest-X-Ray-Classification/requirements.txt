@@ -1,4 +1,5 @@
-﻿torch
+python-dotenv
+torch
 torchvision
 numpy
 pandas
