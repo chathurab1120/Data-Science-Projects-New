@@ -251,35 +251,39 @@ def _format_assessment(pneumonia_prob: float, normal_prob: float) -> str:
     )
 
 
-def _find_example_images(data_dir: Path) -> list[str]:
-    """Discover example image paths for Gradio examples widget.
+def _find_example_images() -> list[list[str]]:
+    """Build Gradio example rows using absolute paths under the Space root.
 
-    Supports ``data_dir/NORMAL`` and ``data_dir/PNEUMONIA`` (HF layout), or
-    ``data_dir/test/NORMAL`` and ``data_dir/test/PNEUMONIA`` (local Kaggle layout).
+    Relative paths break on Hugging Face Spaces because Gradio copies examples
+    into ``/tmp/gradio/...``; resolved absolute paths stay valid.
 
     Args:
-        data_dir: Base dataset directory (e.g. ``test_examples``).
+        None.
 
     Returns:
-        List of up to three example image paths.
+        Rows for ``gr.Examples``: each row is ``[absolute_path]``.
     """
-    normal_dir: Path = data_dir / "NORMAL"
-    pneumonia_dir: Path = data_dir / "PNEUMONIA"
-    if not normal_dir.is_dir():
-        normal_dir = data_dir / "test" / "NORMAL"
-        pneumonia_dir = data_dir / "test" / "PNEUMONIA"
-    normal_candidates: list[Path] = sorted(normal_dir.glob("*.jp*g")) if normal_dir.is_dir() else []
-    pneumonia_candidates: list[Path] = (
-        sorted(pneumonia_dir.glob("*.jp*g")) if pneumonia_dir.is_dir() else []
+    examples: list[list[str]] = []
+    normal_dir: Path = SPACE_ROOT / TEST_EXAMPLES_RELATIVE / "NORMAL"
+    pneumonia_dir: Path = SPACE_ROOT / TEST_EXAMPLES_RELATIVE / "PNEUMONIA"
+
+    normal_images: list[Path] = (
+        sorted(normal_dir.glob("*.jpeg"))
+        + sorted(normal_dir.glob("*.jpg"))
+        + sorted(normal_dir.glob("*.png"))
     )
-    selected_paths: list[Path] = []
-    if normal_candidates:
-        selected_paths.append(normal_candidates[0])
-    if len(pneumonia_candidates) >= 2:
-        selected_paths.extend([pneumonia_candidates[0], pneumonia_candidates[1]])
-    elif pneumonia_candidates:
-        selected_paths.append(pneumonia_candidates[0])
-    return [str(path) for path in selected_paths]
+    if normal_images:
+        examples.append([str(normal_images[0].resolve())])
+
+    pneumonia_images: list[Path] = (
+        sorted(pneumonia_dir.glob("*.jpeg"))
+        + sorted(pneumonia_dir.glob("*.jpg"))
+        + sorted(pneumonia_dir.glob("*.png"))
+    )
+    for img in pneumonia_images[:2]:
+        examples.append([str(img.resolve())])
+
+    return examples
 
 
 MODEL_INFERENCE: ModelInference = ModelInference(
@@ -329,13 +333,6 @@ def build_interface() -> gr.Blocks:
     Returns:
         Configured Gradio Blocks app.
     """
-    data_dir_value: str = str(MODEL_INFERENCE.config["data"]["data_dir"])
-    examples_root: Path = Path(data_dir_value)
-    if not examples_root.is_absolute():
-        examples_root = SPACE_ROOT / examples_root
-    example_images: list[str] = _find_example_images(examples_root)
-    example_rows: list[list[str]] = [[path] for path in example_images]
-
     with gr.Blocks(title="Chest X-Ray Pneumonia Classifier") as demo:
         gr.Markdown("# 🫁 Chest X-Ray Pneumonia Classifier")
         gr.Markdown(
@@ -352,9 +349,10 @@ def build_interface() -> gr.Blocks:
             with gr.Column(scale=1):
                 image_input: gr.Image = gr.Image(type="pil", label="Upload Chest X-Ray Image")
                 analyze_button: gr.Button = gr.Button("🔍 Analyze X-Ray", variant="primary")
-                if example_rows:
+                example_images: list[list[str]] = _find_example_images()
+                if example_images:
                     gr.Examples(
-                        examples=example_rows,
+                        examples=example_images,
                         inputs=[image_input],
                         label="Example Test Images",
                     )
