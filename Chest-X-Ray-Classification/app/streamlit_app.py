@@ -37,6 +37,20 @@ PROJECT_ROOT: Path = Path(__file__).resolve().parents[1]
 FIGURES_DIR: Path = PROJECT_ROOT / "reports" / "figures"
 REPORTS_DIR: Path = PROJECT_ROOT / "reports"
 
+# Final test-set metrics (best checkpoint); keep aligned with README and ``reports/evaluation_report.json``.
+FINAL_OVERVIEW_METRIC_CARDS: tuple[tuple[str, str], ...] = (
+    ("Test Accuracy", "87.8%"),
+    ("Recall", "99.5%"),
+    ("AUC-ROC", "96.8%"),
+    ("F1 Score", "91.1%"),
+)
+FINAL_PERFORMANCE_METRIC_CARDS: tuple[tuple[str, str], ...] = (
+    ("Accuracy", "87.8%"),
+    ("Precision", "84.0%"),
+    ("Recall", "99.5%"),
+    ("F1 Score", "91.1%"),
+)
+
 
 def get_model_path() -> Path:
     """Return path to ``best_model.pth``, downloading from HF Hub if missing locally.
@@ -363,11 +377,9 @@ def render_overview_page(data_summary: dict[str, Any] | None) -> None:
     )
     st.warning("⚠️ Research use only. This dashboard does not provide medical diagnosis.")
 
-    metric_columns = st.columns(4)
-    metric_columns[0].metric("Test Accuracy", "87.8%")
-    metric_columns[1].metric("Recall", "99.5%")
-    metric_columns[2].metric("AUC-ROC", "96.8%")
-    metric_columns[3].metric("F1 Score", "91.1%")
+    metric_columns = st.columns(len(FINAL_OVERVIEW_METRIC_CARDS))
+    for column_index, (metric_label, metric_value) in enumerate(FINAL_OVERVIEW_METRIC_CARDS):
+        metric_columns[column_index].metric(metric_label, metric_value)
 
     left_column, right_column = st.columns(2)
     with left_column:
@@ -428,12 +440,13 @@ def render_performance_page(
         st.warning("Missing `reports/training_results.json`.")
         return
 
-    metrics: dict[str, float] = evaluation_report.get("metrics", {})
-    top_columns = st.columns(4)
-    top_columns[0].metric("Accuracy", f"{metrics.get('accuracy', 0.0) * 100:.2f}%", delta="↑ strong")
-    top_columns[1].metric("Precision", f"{metrics.get('precision', 0.0) * 100:.2f}%", delta="↔ balanced")
-    top_columns[2].metric("Recall", f"{metrics.get('recall', 0.0) * 100:.2f}%", delta="↑ critical")
-    top_columns[3].metric("F1 Score", f"{metrics.get('f1', 0.0) * 100:.2f}%", delta="↑ robust")
+    top_columns = st.columns(len(FINAL_PERFORMANCE_METRIC_CARDS))
+    for column_index, (metric_label, metric_value) in enumerate(FINAL_PERFORMANCE_METRIC_CARDS):
+        top_columns[column_index].metric(metric_label, metric_value)
+    st.caption(
+        "Top metrics: final held-out test evaluation (best epoch 12). "
+        "Charts and tables below use `reports/evaluation_report.json`."
+    )
 
     left_column, right_column = st.columns(2)
     with left_column:
