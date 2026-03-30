@@ -1,0 +1,7 @@
+feature,type,rationale
+credit_history_months,numeric,Credit maturity signal
+loan_to_income,numeric,Affordability ratio
+fico_midpoint,numeric,Combined FICO score
+grade_ord,ordinal,Ordinal risk grade
+high_dti_flag,binary,DTI stress zone flag
+revol_util_clean,numeric,Cleaned revolving utilisation
