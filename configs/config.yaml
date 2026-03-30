@@ -1,0 +1,49 @@
+project:
+  name: "Credit Risk Modeling - Retail Loan Default Prediction"
+  version: "1.0.0"
+  random_state: 42
+
+paths:
+  data_raw: "data/accepted_2007_to_2018Q4.csv"
+  outputs_charts: "outputs/charts"
+  outputs_models: "outputs/models"
+  outputs_results: "outputs/results"
+
+data:
+  target_column: "loan_status"
+  positive_classes:
+    - "Charged Off"
+    - "Default"
+  negative_classes:
+    - "Fully Paid"
+  train_cutoff_year: 2015
+  test_start_year: 2016
+  missing_threshold: 0.40
+
+model:
+  logistic_regression:
+    max_iter: 1000
+    class_weight: "balanced"
+    random_state: 42
+  xgboost:
+    n_estimators: 300
+    max_depth: 4
+    learning_rate: 0.05
+    subsample: 0.8
+    colsample_bytree: 0.8
+    scale_pos_weight: 4
+    random_state: 42
+  lightgbm:
+    n_estimators: 300
+    num_leaves: 63
+    learning_rate: 0.05
+    subsample: 0.8
+    colsample_bytree: 0.8
+    class_weight: "balanced"
+    random_state: 42
+  optuna:
+    n_trials: 50
+
+evaluation:
+  threshold: 0.35
+  top_decile: 10

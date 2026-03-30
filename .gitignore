@@ -1,0 +1,41 @@
+# ── Data files (too large for GitHub) ──
+data/
+*.parquet
+*.csv.gz
+
+# ── Model binaries (too large) ──
+outputs/models/
+
+# ── Python ──
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# ── IDE and Cursor (never push) ──
+.cursor/
+.cursorrules
+
+# ── Environment secrets ──
+.env
+*.env
+.streamlit/secrets.toml
+
+# ── OS ──
+.DS_Store
+Thumbs.db
+
+# ── Jupyter checkpoints ──
+.ipynb_checkpoints/
+
+# ── Logs ──
+*.log
+
+# ── GitHub push helper (local only) ──
+setup_github.sh
