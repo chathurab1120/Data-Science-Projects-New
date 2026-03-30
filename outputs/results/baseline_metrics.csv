@@ -1,0 +1,2 @@
+model,train_auc,test_auc,ks_stat,gini,threshold
+Logistic Regression,0.7123,0.7029,0.2935,0.4059,0.35
