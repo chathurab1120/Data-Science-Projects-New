@@ -38,7 +38,7 @@ A curated collection of end-to-end machine learning and deep learning projects.
 
 ## 💳 3. Credit Risk Modeling — Retail Loan Default Prediction
 
-**Project folder (this repo root):** `Credit_Risk_Modeling/` — portfolio files for this project live at repository paths `scripts/`, `app/`, `outputs/`, `configs/` (see structure below).
+**Project folder:** [`Credit_Risk_Modeling/`](https://github.com/chathurab1120/Data-Science-Projects-New/tree/main/Credit_Risk_Modeling) — same layout as the other portfolio projects (`scripts/`, `app/`, `outputs/`, `configs/`, etc.).
 
 ### Project Overview
 A production-grade Probability of Default (PD) model built on LendingClub loan data (2007–2018, ~2.26M records). The model estimates the likelihood a borrower will default within 12 months of loan origination.
@@ -93,15 +93,18 @@ Credit_Risk_Modeling/
 │   ├── charts/
 │   ├── models/
 │   └── results/
+├── notebooks/        # Optional: jupytext exports
 ├── app/              # Streamlit dashboard
 ├── data/             # Raw data (gitignored — download from Kaggle)
-└── README.md
+├── requirements.txt
+└── runtime.txt
 ```
 
 ### How to Run (Credit Risk)
 ```bash
+cd Credit_Risk_Modeling
 pip install -r requirements.txt
-# Download dataset from Kaggle and place in data/
+# Download dataset from Kaggle and place in data/ (under project root or Credit_Risk_Modeling/data/)
 python scripts/01_data_loading.py
 # ... run pipeline in order ...
 streamlit run app/streamlit_app.py
