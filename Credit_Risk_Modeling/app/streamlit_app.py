@@ -27,12 +27,19 @@ st.set_page_config(
 )
 
 # ── Load config ─────────────────────────────────────────────
-with open("configs/config.yaml", "r") as f:
+# Resolve config path relative to this file's location — works both locally
+# and on Streamlit Cloud regardless of working directory
+import os
+_APP_DIR = Path(__file__).parent          # app/
+_PROJECT_DIR = _APP_DIR.parent            # Credit_Risk_Modeling/
+_CONFIG_PATH = _PROJECT_DIR / "configs" / "config.yaml"
+
+with open(_CONFIG_PATH, "r") as f:
     config = yaml.safe_load(f)
 
-CHARTS  = Path(config["paths"]["outputs_charts"])
-RESULTS = Path(config["paths"]["outputs_results"])
-MODELS  = Path(config["paths"]["outputs_models"])
+CHARTS  = _PROJECT_DIR / config["paths"]["outputs_charts"]
+RESULTS = _PROJECT_DIR / config["paths"]["outputs_results"]
+MODELS  = _PROJECT_DIR / config["paths"]["outputs_models"]
 
 # ── Helper: load image ──────────────────────────────────────
 def show_chart(filename, caption="", width=None):
