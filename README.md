@@ -80,3 +80,6 @@ streamlit run app/streamlit_app.py
 
 ## Tech Stack
 Python 3.11 | XGBoost | LightGBM | SHAP | Streamlit | Gradio | Optuna
+
+---
+*Repository snapshot: March 2026.*
