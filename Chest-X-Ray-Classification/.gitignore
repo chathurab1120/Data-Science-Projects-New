@@ -1,0 +1,18 @@
+﻿# Data artifacts
+/data/raw/
+
+# Model checkpoints
+/models/checkpoints/*.pth
+
+# Python cache and packaging
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Environments and secrets
+.env
+.venv/
+venv/
+
+# OS files
+.DS_Store

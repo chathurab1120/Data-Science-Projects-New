@@ -1,0 +1,35 @@
+# Data (raw data never goes to GitHub - too large)
+data/raw/
+data/processed/
+*.csv
+*.parquet
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.env
+venv/
+.venv/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Trained model binaries (large files)
+outputs/models/*.pkl
+outputs/models/*.joblib
+
+# IDE
+.vscode/
+*.DS_Store
+logs/
+*.log
+
+# Allow outputs for deployment
+!outputs/reports/*.csv
+!outputs/models/best_model.pkl
+!outputs/models/robust_scaler.pkl
+!outputs/models/best_model_name.txt
+
+# Cursor IDE files
+.cursor/
