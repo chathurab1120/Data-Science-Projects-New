@@ -1,0 +1,4 @@
+model,train_auc,test_auc,ks,gini,train_time_s
+Logistic Regression,,0.7029,0.2935,0.4058,
+XGBoost,0.7282,0.7131,0.3087,0.4263,25.7
+LightGBM,0.7268,0.7112,0.3054,0.4223,6.6
