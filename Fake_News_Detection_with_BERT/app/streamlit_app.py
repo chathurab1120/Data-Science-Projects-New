@@ -191,8 +191,9 @@ elif page == "🤖 Live Detector":
     def load_model():
         from transformers import BertTokenizerFast, BertForSequenceClassification
         HF_MODEL_ID = "chathurab1120/bert-fake-news-detector"
-        # Try local model first (works locally), fall back to HF Hub (Streamlit Cloud)
-        if BERT_DIR.exists() and any(BERT_DIR.iterdir()):
+        # Check if local model weights exist (model.safetensors must be present)
+        local_weights = BERT_DIR / "model.safetensors"
+        if local_weights.exists():
             model_source = str(BERT_DIR)
         else:
             model_source = HF_MODEL_ID
