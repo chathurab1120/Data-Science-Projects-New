@@ -1,0 +1,14 @@
+python-dotenv
+torch
+torchvision
+numpy
+pandas
+matplotlib
+seaborn
+scikit-learn
+Pillow
+gradio
+pyyaml
+tqdm
+opencv-python
+albumentations

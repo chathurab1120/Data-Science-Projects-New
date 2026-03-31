@@ -1,0 +1,17 @@
+column,null_count,null_pct,strategy,fill_value,step,p99_value,rows_capped,pct_capped
+mths_since_last_delinq,678761.0,50.45,median,31.0,imputation,,,
+emp_length,78516.0,5.84,fill_Unknown,Unknown,imputation,,,
+emp_length_num,78516.0,5.84,median,6.0,imputation,,,
+mort_acc,47281.0,3.51,median,1.0,imputation,,,
+revol_util,857.0,0.06,median,52.2,imputation,,,
+pub_rec_bankruptcies,697.0,0.05,median,0.0,imputation,,,
+dti,374.0,0.03,median,17.61,imputation,,,
+inq_last_6mths,1.0,0.0,median,0.0,imputation,,,
+annual_inc,,,,,outlier_capping,250000.0,13448.0,1.0
+loan_amnt,,,,,outlier_capping,35000.0,9260.0,0.688
+dti,,,,,outlier_capping,38.47,13446.0,0.999
+revol_bal,,,,,outlier_capping,94553.51,13454.0,1.0
+open_acc,,,,,outlier_capping,29.0,12217.0,0.908
+total_acc,,,,,outlier_capping,61.0,12292.0,0.914
+inq_last_6mths,,,,,outlier_capping,4.0,5899.0,0.438
+delinq_2yrs,,,,,outlier_capping,4.0,10043.0,0.746
