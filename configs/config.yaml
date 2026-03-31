@@ -1,0 +1,43 @@
+project:
+  name: "Fake News Detection with BERT"
+  version: "1.0.0"
+  random_state: 42
+  hf_repo_id: "chathurab1120/bert-fake-news-detector"
+
+paths:
+  data_raw: "data/WELFake_Dataset.csv"
+  outputs_charts: "outputs/charts"
+  outputs_models: "outputs/models"
+  outputs_results: "outputs/results"
+
+data:
+  target_column: "label"
+  text_columns:
+    - "title"
+    - "text"
+  train_size: 0.80
+  val_size: 0.10
+  test_size: 0.10
+  min_text_length: 20
+  max_text_length: 100000
+
+model:
+  name: "bert-base-uncased"
+  max_seq_len: 256
+  batch_size: 32
+  epochs: 4
+  learning_rate: 0.00002
+  warmup_ratio: 0.10
+  weight_decay: 0.01
+  fp16: true
+  save_strategy: "best_val_f1"
+
+evaluation:
+  threshold: 0.5
+  primary_metric: "f1_macro"
+
+baseline:
+  tfidf_max_features: 100000
+  tfidf_ngram_min: 1
+  tfidf_ngram_max: 2
+  lr_max_iter: 1000

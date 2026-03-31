@@ -1,0 +1,25 @@
+# All packages from requirements.txt PLUS:
+pandas
+numpy
+scikit-learn
+torch
+transformers
+tokenizers
+huggingface-hub
+sentencepiece
+accelerate
+lime
+matplotlib
+seaborn
+plotly
+wordcloud
+streamlit
+pyyaml
+tqdm
+# GPU training extras
+datasets
+evaluate
+scipy
+jupytext
+ipykernel
+notebook
