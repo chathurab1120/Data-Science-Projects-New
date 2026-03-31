@@ -1,0 +1,2 @@
+model,split,accuracy,f1_macro,f1_fake,f1_real,precision,recall,roc_auc
+BERT fine-tuned,test,0.9909,0.9908,0.9899,0.9917,0.991,0.9906,0.9996
