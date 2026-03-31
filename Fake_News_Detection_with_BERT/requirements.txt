@@ -1,26 +1,20 @@
-# Core
-pandas
-numpy
-scikit-learn
-
-# NLP
-torch
-transformers
-tokenizers
-huggingface-hub
-sentencepiece
+Pillow
 accelerate
-
-# Explainability
+huggingface-hub
 lime
-
-# Visualisation
 matplotlib
-seaborn
+numpy
+pandas
 plotly
-wordcloud
-
-# App
-streamlit
 pyyaml
+scikit-learn
+scipy
+seaborn
+sentencepiece
+streamlit
+tokenizers
+torch
+torchvision
+transformers
 tqdm
+wordcloud
