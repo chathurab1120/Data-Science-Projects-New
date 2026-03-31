@@ -190,8 +190,14 @@ elif page == "🤖 Live Detector":
     @st.cache_resource(show_spinner="Loading BERT model...")
     def load_model():
         from transformers import BertTokenizerFast, BertForSequenceClassification
-        tokenizer = BertTokenizerFast.from_pretrained(str(BERT_DIR))
-        model     = BertForSequenceClassification.from_pretrained(str(BERT_DIR))
+        HF_MODEL_ID = "chathurab1120/bert-fake-news-detector"
+        # Try local model first (works locally), fall back to HF Hub (Streamlit Cloud)
+        if BERT_DIR.exists() and any(BERT_DIR.iterdir()):
+            model_source = str(BERT_DIR)
+        else:
+            model_source = HF_MODEL_ID
+        tokenizer = BertTokenizerFast.from_pretrained(model_source)
+        model     = BertForSequenceClassification.from_pretrained(model_source)
         device    = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model     = model.to(device)
         model.eval()
@@ -372,10 +378,20 @@ elif page == "🗂 Dataset Explorer":
     try:
         @st.cache_data
         def load_splits():
-            train = pd.read_csv(RESULTS / "train.csv")
-            val   = pd.read_csv(RESULTS / "val.csv")
-            test  = pd.read_csv(RESULTS / "test.csv")
-            return train, val, test
+            splits = {}
+            for name in ["train", "val", "test"]:
+                path = RESULTS / f"{name}.csv"
+                if path.exists():
+                    splits[name] = pd.read_csv(path)
+                else:
+                    # On Streamlit Cloud the large CSVs are not available
+                    # Show a small sample from the results we do have
+                    splits[name] = pd.DataFrame({
+                        "text": ["Dataset splits not available on Streamlit Cloud. "
+                                 "Run scripts/03_preprocessing.py locally to generate them."],
+                        "label": [0]
+                    })
+            return splits["train"], splits["val"], splits["test"]
 
         train_df, val_df, test_df = load_splits()
 
