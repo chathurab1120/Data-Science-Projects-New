@@ -39,3 +39,7 @@ Thumbs.db
 
 # Local scripts
 setup_github.sh
+
+outputs/results/train.csv
+outputs/results/val.csv
+outputs/results/test.csv
