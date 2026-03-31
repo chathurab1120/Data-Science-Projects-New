@@ -1,0 +1,16 @@
+metric,value
+total_samples,72134.0
+real_samples,35028.0
+fake_samples,37106.0
+real_pct,48.56
+fake_pct,51.44
+null_title,558.0
+null_text,39.0
+null_label,0.0
+duplicate_rows,0.0
+duplicate_titles,9229.0
+duplicate_text,9377.0
+median_title_len,73.0
+median_text_len,2424.0
+imbalance_ratio,1.059
+short_articles,44.0
