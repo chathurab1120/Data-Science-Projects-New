@@ -1,0 +1,14 @@
+step,value
+raw_rows,72134
+after_drop_null_label,72134
+after_remove_short,72077
+after_dedup,63606
+train_rows,50884
+val_rows,6361
+test_rows,6361
+train_real,27817
+train_fake,23067
+val_real,3477
+val_fake,2884
+test_real,3478
+test_fake,2883
