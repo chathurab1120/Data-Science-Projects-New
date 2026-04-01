@@ -31,5 +31,8 @@ logs/
 !outputs/models/robust_scaler.pkl
 !outputs/models/best_model_name.txt
 
-# Cursor IDE files
+# Cursor IDE — never commit
 .cursor/
+.cursorrules
+.cursorignore
+.cursorindexingignore

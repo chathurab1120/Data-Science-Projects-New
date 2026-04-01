@@ -18,9 +18,11 @@ env/
 dist/
 build/
 
-# IDE and Cursor — never push
+# Cursor IDE — never commit
 .cursor/
 .cursorrules
+.cursorignore
+.cursorindexingignore
 
 # Environment
 .env

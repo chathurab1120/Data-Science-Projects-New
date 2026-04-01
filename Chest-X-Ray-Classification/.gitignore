@@ -1,4 +1,4 @@
-﻿# Data artifacts
+# Data artifacts
 /data/raw/
 
 # Model checkpoints
@@ -16,3 +16,9 @@ venv/
 
 # OS files
 .DS_Store
+
+# Cursor IDE — never commit
+.cursor/
+.cursorrules
+.cursorignore
+.cursorindexingignore
