@@ -41,6 +41,9 @@ Thumbs.db
 
 # Local scripts
 setup_github.sh
+upload_model.py
+upload_card.py
+modelcard.md
 
 outputs/results/train.csv
 outputs/results/val.csv
